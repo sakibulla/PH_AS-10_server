@@ -24,16 +24,14 @@ async function run() {
         const modelCollection = db.collection('Artify');
         const favoriteCollection = db.collection('favorites');
 
-        // Helper function to convert _id to string
         const formatDoc = (doc) => ({ ...doc, _id: doc._id.toString() });
 
-        // Get all artworks
         app.get('/Artify', async (req, res) => {
             const result = await modelCollection.find().toArray();
             res.json(result.map(formatDoc));
         });
 
-        // Get single artwork
+    
         app.get('/Artify/:id', async (req, res) => {
             const { id } = req.params;
             const result = await modelCollection.findOne({ _id: new ObjectId(id) });
@@ -41,12 +39,11 @@ async function run() {
             res.json({ success: true, result: formatDoc(result) });
         });
 
-        // Get latest 6 artworks
        app.get('/home-arts', async (req, res) => {
     try {
         const arts = await modelCollection
             .find({})
-            .sort({ _id: -1 })  // 👈 newest first
+            .sort({ _id: -1 })  
             .limit(6)
             .toArray();
 
@@ -57,7 +54,6 @@ async function run() {
 });
 
 
-        // Top artists example
         app.get('/top-artists', async (req, res) => {
             try {
                 const artists = await client.db('Artify')
@@ -72,15 +68,12 @@ async function run() {
             }
         });
 
-        // Add new artwork
         app.post('/Artify', async (req, res) => {
             const data = req.body;
             const result = await modelCollection.insertOne(data);
-            // Return inserted document with _id as string
             res.json({ ...data, _id: result.insertedId.toString() });
         });
 
-        // Update artwork
         app.put('/Artify/:id', async (req, res) => {
             const { id } = req.params;
             const updatedModel = req.body;
@@ -91,14 +84,12 @@ async function run() {
             res.json(result);
         });
 
-        // Delete artwork
         app.delete('/Artify/:id', async (req, res) => {
             const { id } = req.params;
             const result = await modelCollection.deleteOne({ _id: new ObjectId(id) });
             res.json(result);
         });
 
-        // PATCH Like Route
         app.patch('/Artify/:id/like', async (req, res) => {
             const { id } = req.params;
             const result = await modelCollection.updateOne(
@@ -112,7 +103,6 @@ async function run() {
             }
         });
 
-        // My Artworks
         app.get('/MyModels', async (req, res) => {
             const email = req.query.email;
             if (!email) return res.json([]);
@@ -120,21 +110,18 @@ async function run() {
             res.json(result.map(formatDoc));
         });
 
-        // Add to favorites
         app.post('/favorites', async (req, res) => {
             const data = req.body;
             const result = await favoriteCollection.insertOne(data);
             res.json({ ...data, _id: result.insertedId.toString() });
         });
 
-        // Get favorites by user email
         app.get('/Myfavorites', async (req, res) => {
             const email = req.query.email;
             const result = await favoriteCollection.find({ email }).toArray();
             res.json(result.map(formatDoc));
         });
 
-        // Remove favorite
         app.delete('/favorites/:id', async (req, res) => {
             const { id } = req.params;
             const result = await favoriteCollection.deleteOne({ _id: new ObjectId(id) });
@@ -147,7 +134,7 @@ async function run() {
 
         console.log("✅ Connected to MongoDB!");
     } finally {
-        // Keep the connection open
+        
     }
 }
 
