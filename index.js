@@ -1,11 +1,13 @@
 const express = require('express');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors');
-
+require("dotenv").config()
 const app = express();
 const port = 3000;
+console.log(process.env.DB_USERNAME)
 
-const uri = "mongodb+srv://sakibulla:evMVxfgo7XqOrz9h@artify.evnytb4.mongodb.net/?appName=Artify";
+
+const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@artify.evnytb4.mongodb.net/?appName=Artify`;
 const client = new MongoClient(uri, {
     serverApi: {
         version: ServerApiVersion.v1,
@@ -19,7 +21,7 @@ app.use(express.json());
 
 async function run() {
     try {
-        await client.connect();
+        // await client.connect();
         const db = client.db('artify-db');
         const modelCollection = db.collection('Artify');
         const favoriteCollection = db.collection('favorites');
