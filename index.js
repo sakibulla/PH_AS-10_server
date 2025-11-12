@@ -91,7 +91,12 @@ async function run() {
             res.json(result);
         });
 
-        
+        // Delete artwork
+        app.delete('/Artify/:id', async (req, res) => {
+            const { id } = req.params;
+            const result = await modelCollection.deleteOne({ _id: new ObjectId(id) });
+            res.json(result);
+        });
 
         // PATCH Like Route
         app.patch('/Artify/:id/like', async (req, res) => {
