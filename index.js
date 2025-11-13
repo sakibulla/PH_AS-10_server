@@ -16,12 +16,11 @@ const client = new MongoClient(uri, {
     }
 });
 
-app.use(cors({ origin: 'http://localhost:5173' }));
+app.use(cors({ origin: '*' }));
 app.use(express.json());
 
 async function run() {
     try {
-        // await client.connect();
         const db = client.db('artify-db');
         const modelCollection = db.collection('Artify');
         const favoriteCollection = db.collection('favorites');
