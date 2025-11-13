@@ -32,7 +32,7 @@ async function run() {
             res.json(result.map(formatDoc));
         });
 
-    
+
         app.get('/Artify/:id', async (req, res) => {
             const { id } = req.params;
             const result = await modelCollection.findOne({ _id: new ObjectId(id) });
@@ -40,19 +40,19 @@ async function run() {
             res.json({ success: true, result: formatDoc(result) });
         });
 
-       app.get('/home-arts', async (req, res) => {
-    try {
-        const arts = await modelCollection
-            .find({})
-            .sort({ _id: -1 })  
-            .limit(6)
-            .toArray();
+        app.get('/home-arts', async (req, res) => {
+            try {
+                const arts = await modelCollection
+                    .find({})
+                    .sort({ _id: -1 })
+                    .limit(6)
+                    .toArray();
 
-        res.json(arts.map(formatDoc));
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-});
+                res.json(arts.map(formatDoc));
+            } catch (err) {
+                res.status(500).json({ message: err.message });
+            }
+        });
 
 
         app.get('/top-artists', async (req, res) => {
@@ -111,31 +111,46 @@ async function run() {
             res.json(result.map(formatDoc));
         });
 
-        app.post('/favorites', async (req, res) => {
-            const data = req.body;
-            const result = await favoriteCollection.insertOne(data);
-            res.json({ ...data, _id: result.insertedId.toString() });
+        // Add a favorite by model ID
+        app.post('/favorites/:id', async (req, res) => {
+            const { id } = req.params;
+            const { email } = req.body; // user email
+
+            if (!email) return res.status(400).json({ success: false, message: "Email is required" });
+
+            const model = await modelCollection.findOne({ _id: new ObjectId(id) });
+            if (!model) return res.status(404).json({ success: false, message: "Model not found" });
+
+            const favorite = { ...model, email };
+            const result = await favoriteCollection.insertOne(favorite);
+            res.json({ ...favorite, _id: result.insertedId.toString() });
         });
 
-        app.get('/Myfavorites', async (req, res) => {
+
+        app.get('/favorites', async (req, res) => {
             const email = req.query.email;
             const result = await favoriteCollection.find({ email }).toArray();
             res.json(result.map(formatDoc));
         });
 
-        app.delete('/favorites/:id', async (req, res) => {
-            const { id } = req.params;
-            const result = await favoriteCollection.deleteOne({ _id: new ObjectId(id) });
-            if (result.deletedCount > 0) {
-                res.json({ success: true, message: "Removed from favorites" });
-            } else {
-                res.status(404).json({ success: false, message: "Favorite not found" });
-            }
-        });
+// Delete a single favorite by its _id
+app.delete('/favorites/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const result = await favoriteCollection.deleteOne({ _id: new ObjectId(id) });
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ success: false, message: "Favorite not found" });
+        }
+        res.json({ success: true, message: "Favorite removed" });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
 
         console.log("✅ Connected to MongoDB!");
     } finally {
-        
+
     }
 }
 
